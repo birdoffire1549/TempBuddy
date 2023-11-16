@@ -86,7 +86,7 @@
 // Define Statements
 // ************************************************************************************
 
-#define FIRMWARE_VERSION "3.3.1"
+#define FIRMWARE_VERSION "3.5.0"
 
 #define LED_PIN 5
 #define OUTLET_PIN 4
@@ -271,7 +271,7 @@ unsigned long lastTempBuddyRead = 0UL;
   web requests and signal IP Address as requested.
 */
 void doHandleReadTempBuddy() {
-  if (settings.getIsAutoControl() && !settings.getTempBuddyIp().isEmpty() && (lastTempBuddyRead == 0UL || millis() - lastTempBuddyRead >= 60000)) { // Need to check TempBuddy...
+  if (!settings.getTempBuddyIp().isEmpty() && (lastTempBuddyRead == 0UL || millis() - lastTempBuddyRead >= 60000)) { // Need to check TempBuddy...
     lastTempBuddyRead = millis();
     if (ParseUtils::validDotNotationIp(settings.getTempBuddyIp())) { // IP Address is valid...
       if (myWifi.isConnected()) { // Connected to WiFi...

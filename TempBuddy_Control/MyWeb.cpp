@@ -157,7 +157,8 @@ void MyWeb::showIndexPage(WiFiClient client, String parameters, String bodyIn) {
     if (!autoControl.isEmpty()) { // Incoming auto control update from Manual Controls...
       settings->setIsAutoControl(autoControl.equals("enabled"));
       settings->saveSettings();
-    } else { // Not modifying auto control so on/off actions allowed...
+    } 
+    if (!settings->getIsAutoControl()) {
       if (parameters.indexOf("control=off") != -1) { // Parameter found to turn control off...
         settings->setIsControlOn(false);
       } else if (parameters.indexOf("control=on") != -1) { // Parameter found to turn control on...
@@ -166,25 +167,31 @@ void MyWeb::showIndexPage(WiFiClient client, String parameters, String bodyIn) {
     }
   } else if (bodyIn.indexOf("source=autocontrols") != -1 && settings->getIsAutoControl()) { // <------------------- AutoControl is ON...
     bool updateSuccessful = false;
+    bool wasUpdate = false;
     bodyIn.trim();  // Because trailing whitespace can affect last parameter value.
     String desiredTemp = ParseUtils::parseByKeyword(bodyIn, "desiredtemp=", "&");
     String tempPadding = ParseUtils::parseByKeyword(bodyIn, "temppadding=", "&");
     String autoControl = ParseUtils::parseByKeyword(bodyIn, "autocontrol=", "&");
     if (!autoControl.isEmpty()) { // Handle updating of the enable status of AutoControl...
       settings->setIsAutoControl(autoControl.equals("enabled"));
+      wasUpdate = true;
     }
     if (!desiredTemp.isEmpty() && !tempPadding.isEmpty()) {
       settings->setDesiredTemp(desiredTemp.toFloat());
       settings->setTempPadding(tempPadding.toFloat());
-      if (settings->saveSettings()) {
-        updateSuccessful = true;
-      }
+      wasUpdate = true;
     }
 
-    if (updateSuccessful) {
-      content += UPDATE_SUCCESSFUL_MSG;
-    } else {
-      content += UPDATE_FAILED_MSG;
+    if (wasUpdate && settings->saveSettings()) {
+      updateSuccessful = true;
+    }
+
+    if (wasUpdate) {
+      if (updateSuccessful) {
+        content += UPDATE_SUCCESSFUL_MSG;
+      } else {
+        content += UPDATE_FAILED_MSG;
+      }
     }
   }
 
